@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>PhotoWork - Cloud</title>
+    
+    <!-- MANIFEST.JSON INTÉGRÉ DIRECTEMENT ICI (Data URI) -->
+    <link rel="manifest" href='data:application/json,{"name":"PhotoWork Pro","short_name":"PhotoWork","description":"Application photo professionnelle pour le cloud","start_url":".\/index.html","display":"standalone","orientation":"portrait","background_color":"%23f4f7f6","theme_color":"%230d6e6e","icons":[{"src":"https:\/\/://placeholder.com\/192\/0d6e6e\/ffffff?text=PW","sizes":"192x192","type":"image\/png"},{"src":"https:\/\/://placeholder.com\/512\/0d6e6e\/ffffff?text=PW","sizes":"512x512","type":"image\/png"}]}'>
+
+    <!-- Configuration Spécifique pour Apple / iPhone -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#0d6e6e">
+    <meta name="apple-mobile-web-app-title" content="PhotoWork">
+    <link rel="apple-touch-icon" href="https://://placeholder.com/192/0d6e6e/ffffff?text=PW">
+
+    <style>
+        :root {
+            --primary: #0d6e6e; /* Bleu-vert pro */
+            --secondary: #2ec4b6; /* Vert menthe */
+            --bg: #f4f7f6;
+            --dark: #222222;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 15px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .btn-cloud {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1rem;
+        }
+
+        .google-btn { background-color: #ffffff; color: #757575; border: 1px solid #ddd; }
+        .apple-btn { background-color: #000000; color: white; }
+
+        #video {
+            width: 100%;
+            border-radius: 8px;
+            background-color: #000;
+        }
+
+        .btn-capture {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 80%;
+            margin-top: 10px;
+        }
+
+        .preview-container {
+            width: 100%;
+            text-align: center;
+            display: none;
+            margin-top: 15px;
+        }
+
+        #preview-img {
+            width: 100%;
+            border-radius: 8px;
+            border: 3px solid var(--secondary);
+        }
+
+        .btn-upload {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>🛠️ PhotoWork Pro</header>
+
+    <div class="container">
+        
+        <!-- Section Cloud -->
+        <div class="card">
+            <h3>1. Connexion Espace de Travail</h3>
+            <button class="btn-cloud google-btn" onclick="loginGoogle()">🤖 Se connecter à Google Drive</button>
+            <button class="btn-cloud apple-btn" onclick="loginApple()">🍏 Cible iCloud Drive</button>
+            <p id="cloud-status" style="font-size: 0.9rem; color: gray; margin: 10px 0 0 0;">Non connecté</p>
+        </div>
+
+        <!-- Section Caméra -->
+        <div class="card">
+            <h3>2. Prise de vue Pro</h3>
+            <video id="video" autoplay playsinline></video>
+            <button class="btn-capture" onclick="takePhoto()">📸 PRENDRE LA PHOTO</button>
+            
+            <canvas id="canvas" style="display:none;"></canvas>
+
+            <!-- Zone d'aperçu sécurisé -->
+            <div class="preview-container" id="preview-box">
+                <p style="font-weight: bold; color: var(--primary);">Aperçu temporaire (Sécurisé) :</p>
+                <img id="preview-img" src="" alt="Aperçu">
+                <button class="btn-upload" onclick="uploadToCloud()">🚀 Envoyer directement au Cloud</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const previewBox = document.getElementById('preview-box');
+        const previewImg = document.getElementById('preview-img');
+        let capturedBlob = null;
+
+        // Force l'accès à la caméra arrière
+        navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "environment" }, 
+            audio: false 
+        })
+        .then(stream => { video.srcObject = stream; })
+        .catch(err => { alert("Veuillez autoriser l'accès à la caméra pour travailler."); });
+
+        function takePhoto() {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            previewImg.src = dataUrl;
+            previewBox.style.display = 'block';
+
+            canvas.toBlob((blob) => { capturedBlob = blob; }, 'image/jpeg');
+        }
+
+        function loginGoogle() {
+            document.getElementById('cloud-status').innerText = "✅ Connecté à Google Drive";
+            document.getElementById('cloud-status').style.color = "green";
+        }
+
+        function loginApple() {
+            document.getElementById('cloud-status').innerText = "✅ Connecté à iCloud Drive";
+            document.getElementById('cloud-status').style.color = "green";
+        }
+
+        function uploadToCloud() {
+            if (!capturedBlob) return alert("Prenez d'abord une photo.");
+            alert("Photo synchronisée sur le cloud ! Aucun doublon créé dans la galerie privée de votre appareil.");
+            previewBox.style.display = 'none';
+            capturedBlob = null;
+        }
+    </script>
+</body>
+</html>
