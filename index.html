@@ -1,303 +1,994 @@
-
 <!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Ma Ferme Idle</title>
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<title>Survival Guner</title>
+
+<!-- =========================
+     ICÔNE DU JEU
+========================= -->
+
+<link rel="icon"
+      type="image/png"
+      href="Icone-MonsterSurvival.png">
+
+<link rel="apple-touch-icon"
+      href="Icone-MonsterSurvival.png">
+
+<!-- =========================
+     INSTALLATION MOBILE
+========================= -->
+
+<link rel="manifest"
+      href="manifest.json">
+
+<meta name="mobile-web-app-capable"
+      content="yes">
+
+<meta name="apple-mobile-web-app-capable"
+      content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style"
+      content="black">
+
+<meta name="apple-mobile-web-app-title"
+      content="Survival Guner">
+
+<meta name="theme-color"
+      content="#111827">
+
+
 <style>
-:root{--green:#4f9e45;--dark:#245a35;--gold:#ffd45e;--cream:#fff7dc;--ink:#263d2a}
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:linear-gradient(#8bd5f5 0 22%,#bceaa0 22% 100%);min-height:100vh}
-.app{max-width:1000px;margin:auto;padding:12px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:#fff9e8ef;border:3px solid #fff;border-radius:18px;padding:10px 14px;box-shadow:0 5px 0 #34754840}
-.brand{font-size:clamp(20px,4vw,30px);font-weight:900;color:#28733b;text-shadow:1px 2px #c8ed9e}
-.wallet{display:flex;gap:8px;flex-wrap:wrap}
-.pill{background:#fff;border:2px solid #e5e8b2;border-radius:14px;padding:7px 12px;font-weight:800;white-space:nowrap}
-.scene{position:relative;margin:12px 0;background:linear-gradient(#92d5fa 0 18%,#b2df83 18% 100%);border:4px solid #fff;border-radius:22px;overflow:hidden;min-height:410px;box-shadow:0 7px 0 #36754845}
-.sun{position:absolute;right:8%;top:5%;font-size:38px}
-.cloud{position:absolute;left:10%;top:6%;font-size:38px;opacity:.9}
-.barn{position:absolute;right:7%;top:17%;font-size:56px;filter:drop-shadow(0 3px 0 #0002)}
-.farmground{position:absolute;left:-10%;right:-10%;top:29%;bottom:-20%;background:#8cce62;transform:rotate(-5deg);border-top:8px solid #65ad4b}
-.path{position:absolute;left:0;right:0;top:56%;height:46px;background:#e9c98a;border-top:4px solid #d4ad6c;border-bottom:4px solid #d4ad6c;transform:rotate(-8deg);opacity:.95}
-.plots{position:relative;display:grid;grid-template-columns:repeat(4,minmax(55px,1fr));gap:10px;padding:110px 18px 20px;z-index:2}
-.plot{position:relative;min-height:88px;border:3px solid #81542d;border-radius:12px;background:linear-gradient(145deg,#b77b45,#89572f);box-shadow:inset 0 0 0 4px #d49a5c,0 5px 0 #684323;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;user-select:none;transition:transform .12s}
-.plot:active{transform:scale(.96)}
-.plot .crop{font-size:clamp(27px,5vw,43px);line-height:1.1;filter:drop-shadow(0 2px 0 #0002)}
-.plot .label{font-size:11px;font-weight:900;background:#fff3c8;border-radius:8px;padding:2px 6px;margin-top:3px}
-.plot.ready{animation:bob 1s infinite alternate;border-color:#ffd54a}
-.plot.ready .label{background:#ffeb70}
-.plot.empty .crop{opacity:.5}
-@keyframes bob{to{transform:translateY(-3px)}}
-.hint{position:relative;z-index:3;margin:0 16px 14px;background:#fff9e6;border-radius:12px;padding:9px 12px;font-size:13px;font-weight:700;text-align:center}
-.panels{display:grid;grid-template-columns:1.1fr 1fr;gap:12px}
-.panel{background:#fff9e8;border:3px solid #fff;border-radius:18px;padding:13px;box-shadow:0 5px 0 #36754835}
-.panel h2{margin:0 0 10px;font-size:18px}
-.shopgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.shopitem{background:#e7f4cf;border:2px solid #b9d89c;border-radius:12px;padding:9px;text-align:left;cursor:pointer;color:var(--ink);font:inherit}
-.shopitem strong{display:block}
-.shopitem small{display:block;opacity:.8;margin-top:3px}
-.shopitem:disabled{opacity:.45;cursor:not-allowed}
-.actionrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.btn{border:0;border-radius:12px;background:#168ca1;color:white;font-weight:900;padding:10px 14px;font-size:14px;cursor:pointer;box-shadow:0 4px 0 #0b6071}
-.btn.secondary{background:#e8b944;color:#563e12;box-shadow:0 4px 0 #b18421}
-.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #0b6071}
-.status{font-size:13px;font-weight:700;min-height:20px;margin-top:8px;color:#28733b}
-.footer{text-align:center;font-size:12px;opacity:.75;margin:15px 0 6px}
-@media(max-width:560px){
-.plots{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:100px 12px 16px}
-.plot{min-height:77px}
-.scene{min-height:500px}
-.panels{grid-template-columns:1fr}
-.barn{font-size:45px}
-.brand{width:100%}
-.top{justify-content:center}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#111827;
+  font-family:Arial,sans-serif;
+  touch-action:none;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+#game{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
+  background:#17212b;
+}
+
+canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
+
+
+/* =========================
+   INTERFACE
+========================= */
+
+#ui{
+  position:absolute;
+  top:12px;
+  left:12px;
+  right:12px;
+
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+
+  pointer-events:none;
+  z-index:5;
+}
+
+.box{
+  background:#000b;
+  color:white;
+
+  border:2px solid #ffffff33;
+  border-radius:14px;
+
+  padding:8px 12px;
+
+  font-weight:bold;
+  font-size:14px;
+
+  backdrop-filter:blur(5px);
+}
+
+#healthBox{
+  width:150px;
+}
+
+#healthBar{
+  width:100%;
+  height:10px;
+
+  margin-top:5px;
+
+  background:#401414;
+  border-radius:10px;
+
+  overflow:hidden;
+}
+
+#health{
+  width:100%;
+  height:100%;
+
+  background:#35d05b;
+}
+
+
+/* =========================
+   BOUTON AMÉLIORATIONS
+========================= */
+
+#upgradeButton{
+
+  position:absolute;
+
+  top:75px;
+  right:15px;
+
+  z-index:10;
+
+  border:0;
+  border-radius:12px;
+
+  padding:11px 15px;
+
+  background:#f59e0b;
+  color:#241000;
+
+  font-size:15px;
+  font-weight:bold;
+
+  box-shadow:0 4px 12px #0006;
+}
+
+
+/* =========================
+   JOYSTICK
+========================= */
+
+#joystick{
+
+  position:absolute;
+
+  left:25px;
+  bottom:25px;
+
+  width:125px;
+  height:125px;
+
+  border-radius:50%;
+
+  background:#ffffff18;
+
+  border:3px solid #ffffff35;
+
+  z-index:10;
+}
+
+#stick{
+
+  position:absolute;
+
+  width:58px;
+  height:58px;
+
+  left:50%;
+  top:50%;
+
+  transform:translate(-50%,-50%);
+
+  border-radius:50%;
+
+  background:#ffffff55;
+
+  border:3px solid #ffffff66;
+}
+
+
+/* =========================
+   INFO TIR
+========================= */
+
+#shootInfo{
+
+  position:absolute;
+
+  right:20px;
+  bottom:30px;
+
+  padding:12px 16px;
+
+  background:#0009;
+  color:white;
+
+  border-radius:14px;
+
+  font-weight:bold;
+
+  z-index:5;
+}
+
+
+/* =========================
+   MENU AMÉLIORATIONS
+========================= */
+
+#upgradeMenu{
+
+  position:absolute;
+
+  inset:0;
+
+  z-index:25;
+
+  display:none;
+
+  align-items:center;
+  justify-content:center;
+
+  background:#000b;
+
+  color:white;
+}
+
+#upgradePanel{
+
+  position:relative;
+
+  width:min(430px,92vw);
+
+  max-height:90vh;
+
+  overflow-y:auto;
+
+  background:#1f2937;
+
+  border:2px solid #ffffff22;
+
+  border-radius:20px;
+
+  padding:20px;
+
+  box-shadow:0 10px 40px #0009;
+}
+
+#upgradePanel h2{
+
+  text-align:center;
+
+  margin:0 0 8px;
+
+  font-size:28px;
+}
+
+#coinsText{
+
+  text-align:center;
+
+  color:#ffd45e;
+
+  font-size:20px;
+
+  font-weight:bold;
+
+  margin-bottom:18px;
+}
+
+
+/* =========================
+   BOUTON FERMER
+========================= */
+
+#closeUpgrade{
+
+  position:absolute;
+
+  top:12px;
+  right:12px;
+
+  width:42px;
+  height:42px;
+
+  padding:0;
+
+  border:0;
+
+  border-radius:50%;
+
+  background:#ef4444;
+
+  color:white;
+
+  font-size:22px;
+
+  font-weight:bold;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  cursor:pointer;
+}
+
+
+/* =========================
+   AMÉLIORATIONS
+========================= */
+
+.upgrade{
+
+  background:#111827;
+
+  border:2px solid #ffffff15;
+
+  border-radius:15px;
+
+  padding:14px;
+
+  margin-bottom:12px;
+}
+
+.upgradeTitle{
+
+  font-size:18px;
+  font-weight:bold;
+
+  margin-bottom:5px;
+}
+
+.upgradeDescription{
+
+  font-size:13px;
+
+  opacity:.75;
+
+  margin-bottom:10px;
+}
+
+.upgradeBottom{
+
+  display:flex;
+
+  align-items:center;
+  justify-content:space-between;
+
+  gap:8px;
+}
+
+.upgradeLevel{
+
+  font-size:13px;
+
+  color:#ffd45e;
+}
+
+.upgrade button{
+
+  border:0;
+
+  border-radius:10px;
+
+  padding:9px 12px;
+
+  background:#22c55e;
+
+  color:#062b12;
+
+  font-weight:bold;
+
+  font-size:14px;
+}
+
+.upgrade button:disabled{
+
+  background:#555;
+
+  color:#aaa;
+
+}
+
+
+/* =========================
+   ÉCRANS
+========================= */
+
+#gameOver,
+#startScreen{
+
+  position:absolute;
+
+  inset:0;
+
+  z-index:20;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  flex-direction:column;
+
+  background:#000b;
+
+  color:white;
+
+  text-align:center;
+}
+
+#startScreen{
+
+  z-index:30;
+
+  background:
+  radial-gradient(circle,#374151,#111827);
+}
+
+#gameOver{
+  display:none;
+}
+
+#startScreen h1,
+#gameOver h1{
+
+  margin:0 0 10px;
+
+  font-size:42px;
+}
+
+#startScreen p{
+
+  max-width:360px;
+
+  line-height:1.5;
+
+  opacity:.85;
+
+  padding:0 20px;
+}
+
+button{
+
+  border:0;
+
+  border-radius:14px;
+
+  padding:14px 25px;
+
+  font-size:18px;
+
+  font-weight:bold;
+
+  background:#f59e0b;
+
+  color:#241000;
+
+  cursor:pointer;
+}
+
+button:active{
+
+  transform:scale(.96);
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:500px){
+
+  #ui{
+
+    top:8px;
+    left:8px;
+    right:8px;
+
+  }
+
+  .box{
+
+    font-size:11px;
+
+    padding:7px 8px;
+
+  }
+
+  #healthBox{
+
+    width:120px;
+
+  }
+
+  #upgradeButton{
+
+    top:70px;
+    right:10px;
+
+    font-size:13px;
+
+    padding:9px 11px;
+
+  }
+
+  #joystick{
+
+    width:115px;
+    height:115px;
+
+    left:18px;
+    bottom:18px;
+
+  }
+
+  #shootInfo{
+
+    right:12px;
+    bottom:20px;
+
+    font-size:12px;
+
+  }
+
+}
+
 </style>
 </head>
+
+
 <body>
-<main class="app">
-<header class="top">
-<div class="brand">🌻 Ma Ferme Idle</div>
-<div class="wallet">
-<div class="pill">🪙 <span id="money">50</span></div>
-<div class="pill">🌾 Récoltes : <span id="harvests">0</span></div>
-<div class="pill">👨‍🌾 Ouvriers : <span id="workers">0</span></div>
-</div>
-</header>
 
-<section class="scene">
-<div class="sun">☀️</div>
-<div class="cloud">☁️</div>
-<div class="barn">🏡</div>
-<div class="farmground"></div>
-<div class="path"></div>
-<div class="plots" id="plots"></div>
-<div class="hint" id="hint">Clique sur une parcelle vide pour planter des carottes. Clique sur une culture mûre pour la récolter !</div>
-</section>
+<div id="game">
 
-<section class="panels">
-<div class="panel">
-<h2>🛒 Boutique de la ferme</h2>
-<div class="shopgrid">
-<button class="shopitem" id="buyPlot"><strong>🪵 Nouvelle parcelle</strong><small id="plotCost">Coût : 40 🪙</small></button>
-<button class="shopitem" id="buyWorker"><strong>👨‍🌾 Embaucher un ouvrier</strong><small id="workerCost">Coût : 100 🪙</small></button>
-<button class="shopitem" id="buySeeds"><strong>🌱 Meilleures semences</strong><small id="seedCost">Coût : 75 🪙</small></button>
-<button class="shopitem" id="buySpeed"><strong>💨 Croissance rapide</strong><small id="speedCost">Coût : 90 🪙</small></button>
-</div>
-<div class="status" id="status">Bienvenue à la ferme !</div>
+<canvas id="canvas"></canvas>
+
+
+<!-- INTERFACE -->
+
+<div id="ui">
+
+  <div class="box" id="healthBox">
+
+    ❤️ Vie
+
+    <div id="healthBar">
+      <div id="health"></div>
+    </div>
+
+  </div>
+
+
+  <div class="box">
+    👾 <span id="kills">0</span>
+  </div>
+
+
+  <div class="box">
+    🏆 <span id="score">0</span>
+  </div>
+
+
+  <div class="box">
+    🌊 Vague <span id="wave">1</span>
+  </div>
+
 </div>
 
-<div class="panel">
-<h2>📋 Ton exploitation</h2>
-<p>🥕 Valeur d'une récolte : <b><span id="cropValue">12</span> pièces</b></p>
-<p>⏱️ Temps de pousse : <b><span id="growTime">8</span> secondes</b></p>
-<p>🌱 Parcelles disponibles : <b><span id="plotCount">8</span></b></p>
-<p>💰 Revenus automatiques : <b><span id="autoRate">0</span> pièces / seconde</b></p>
-<div class="actionrow">
-<button class="btn" id="saveBtn">💾 Sauvegarder</button>
-<button class="btn secondary" id="resetBtn">↻ Recommencer</button>
-</div>
-</div>
-</section>
 
-<div class="footer">Ta progression est sauvegardée automatiquement sur cet appareil.</div>
-</main>
+<!-- BOUTON AMÉLIORATIONS -->
+
+<button id="upgradeButton">
+  ⚙️ AMÉLIORATIONS
+</button>
+
+
+<!-- JOYSTICK -->
+
+<div id="joystick">
+  <div id="stick"></div>
+</div>
+
+
+<div id="shootInfo">
+  🎯 Tir automatique
+</div>
+
+
+<!-- MENU AMÉLIORATIONS -->
+
+<div id="upgradeMenu">
+
+  <div id="upgradePanel">
+
+    <button id="closeUpgrade">
+      ✕
+    </button>
+
+
+    <h2>
+      ⚙️ Améliorations
+    </h2>
+
+
+    <div id="coinsText">
+      💰 0
+    </div>
+
+
+    <!-- VIE -->
+
+    <div class="upgrade">
+
+      <div class="upgradeTitle">
+        ❤️ Plus de vie
+      </div>
+
+      <div class="upgradeDescription">
+        Augmente ta vie maximale de 25.
+      </div>
+
+      <div class="upgradeBottom">
+
+        <div
+        class="upgradeLevel"
+        id="healthLevel">
+          Niveau 0
+        </div>
+
+        <button id="healthUpgrade">
+          💰 50
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- TIR -->
+
+    <div class="upgrade">
+
+      <div class="upgradeTitle">
+        🔫 Tir plus rapide
+      </div>
+
+      <div class="upgradeDescription">
+        Ton arme tire plus rapidement.
+      </div>
+
+      <div class="upgradeBottom">
+
+        <div
+        class="upgradeLevel"
+        id="fireLevel">
+          Niveau 0
+        </div>
+
+        <button id="fireUpgrade">
+          💰 75
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- DÉGÂTS -->
+
+    <div class="upgrade">
+
+      <div class="upgradeTitle">
+        💥 Plus de dégâts
+      </div>
+
+      <div class="upgradeDescription">
+        Chaque balle inflige plus de dégâts.
+      </div>
+
+      <div class="upgradeBottom">
+
+        <div
+        class="upgradeLevel"
+        id="damageLevel">
+          Niveau 0
+        </div>
+
+        <button id="damageUpgrade">
+          💰 100
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- VITESSE -->
+
+    <div class="upgrade">
+
+      <div class="upgradeTitle">
+        🏃 Plus de vitesse
+      </div>
+
+      <div class="upgradeDescription">
+        Déplace ton personnage plus rapidement.
+      </div>
+
+      <div class="upgradeBottom">
+
+        <div
+        class="upgradeLevel"
+        id="speedLevel">
+          Niveau 0
+        </div>
+
+        <button id="speedUpgrade">
+          💰 60
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ÉCRAN DE DÉPART -->
+
+<div id="startScreen">
+
+  <h1>
+    👾 Survival Guner
+  </h1>
+
+  <p>
+
+    Explore le monde, évite les monstres
+    et ton arme tirera automatiquement
+    sur l'ennemi le plus proche.
+
+    <br><br>
+
+    Élimine les monstres pour gagner
+    des 💰 pièces et améliorer ton personnage.
+
+  </p>
+
+  <button id="startBtn">
+    JOUER
+  </button>
+
+</div>
+
+
+<!-- GAME OVER -->
+
+<div id="gameOver">
+
+  <h1>
+    💀 GAME OVER
+  </h1>
+
+  <p>
+    Score :
+    <b id="finalScore">0</b>
+  </p>
+
+  <p>
+    Monstres éliminés :
+    <b id="finalKills">0</b>
+  </p>
+
+  <button id="restartBtn">
+    REJOUER
+  </button>
+
+</div>
+
 
 <script>
-(()=>{
-const initial=()=>({
-money:50,
-harvests:0,
-workers:0,
-plots:8,
-seeds:0,
-speed:0,
-crops:{}
-});
 
-let game;
-try{
-game=JSON.parse(localStorage.getItem('maFermeIdleSave'))||initial();
-}catch(e){
-game=initial();
+/* =====================================================
+   CANVAS
+===================================================== */
+
+const canvas=
+document.getElementById("canvas");
+
+const ctx=
+canvas.getContext("2d");
+
+
+/* =====================================================
+   INTERFACE
+===================================================== */
+
+const scoreText=
+document.getElementById("score");
+
+const killsText=
+document.getElementById("kills");
+
+const waveText=
+document.getElementById("wave");
+
+const healthBar=
+document.getElementById("health");
+
+const startScreen=
+document.getElementById("startScreen");
+
+const gameOverScreen=
+document.getElementById("gameOver");
+
+const finalScore=
+document.getElementById("finalScore");
+
+const finalKills=
+document.getElementById("finalKills");
+
+const joystick=
+document.getElementById("joystick");
+
+const stick=
+document.getElementById("stick");
+
+const upgradeMenu=
+document.getElementById("upgradeMenu");
+
+const coinsText=
+document.getElementById("coinsText");
+
+
+/* =====================================================
+   ÉCRAN
+===================================================== */
+
+let W=0;
+let H=0;
+
+function resize(){
+
+  W=
+  canvas.width=
+  window.innerWidth;
+
+  H=
+  canvas.height=
+  window.innerHeight;
+
 }
 
-const $=id=>document.getElementById(id);
+window.addEventListener(
+  "resize",
+  resize
+);
 
-const costs=()=>({
-plot:Math.floor(40*Math.pow(1.55,Math.max(0,game.plots-8))),
-worker:Math.floor(100*Math.pow(1.65,game.workers)),
-seeds:Math.floor(75*Math.pow(1.8,game.seeds)),
-speed:Math.floor(90*Math.pow(1.7,game.speed))
-});
+resize();
 
-const cropValue=()=>12+game.seeds*8;
-const growMs=()=>Math.max(1800,8000-game.speed*1300);
 
-function say(t){
-$('status').textContent=t;
-$('hint').textContent=t;
-}
+/* =====================================================
+   MONDE
+===================================================== */
 
-function plant(i){
-if(game.crops[i]){
-const c=game.crops[i];
+const WORLD_WIDTH=3000;
+const WORLD_HEIGHT=3000;
 
-if(Date.now()-c.planted>=growMs()){
-game.money+=cropValue();
-game.harvests++;
-delete game.crops[i];
-say('Belle récolte ! +'+cropValue()+' pièces 🥕');
-render();
-save(false);
-}else{
-const left=Math.ceil((growMs()-(Date.now()-c.planted))/1000);
-say('Ça pousse encore… '+left+' seconde(s).');
-}
-return;
-}
 
-game.crops[i]={planted:Date.now()};
-say('Tu as planté des carottes ! Reviens dans quelques secondes.');
-render();
-save(false);
-}
+/* =====================================================
+   CAMÉRA
+===================================================== */
 
-function render(){
-$('money').textContent=Math.floor(game.money).toLocaleString('fr-CA');
-$('harvests').textContent=game.harvests;
-$('workers').textContent=game.workers;
-$('cropValue').textContent=cropValue();
-$('growTime').textContent=(growMs()/1000).toFixed(1).replace('.',',');
-$('plotCount').textContent=game.plots;
-$('autoRate').textContent=(game.workers*cropValue()/Math.max(4,growMs()/1000)).toFixed(1).replace('.',',');
-$('plotCost').textContent='Coût : '+costs().plot+' 🪙';
-$('workerCost').textContent='Coût : '+costs().worker+' 🪙';
-$('seedCost').textContent='Coût : '+costs().seeds+' 🪙';
-$('speedCost').textContent='Coût : '+costs().speed+' 🪙';
+const CAMERA_ZOOM=.58;
 
-$('buyPlot').disabled=game.money<costs().plot;
-$('buyWorker').disabled=game.money<costs().worker;
-$('buySeeds').disabled=game.money<costs().seeds;
-$('buySpeed').disabled=game.money<costs().speed;
-
-const wrap=$('plots');
-wrap.innerHTML='';
-
-for(let i=0;i<game.plots;i++){
-const c=game.crops[i];
-const el=document.createElement('button');
-const ready=c&&Date.now()-c.planted>=growMs();
-
-el.className='plot '+(!c?'empty':'')+(ready?' ready':'');
-el.innerHTML=c
-?`<span class="crop">${ready?'🥕':'🌱'}</span><span class="label">${ready?'RÉCOLTER':'Ça pousse…'}</span>`
-:`<span class="crop">🟤</span><span class="label">Planter</span>`;
-
-el.addEventListener('click',()=>plant(i));
-wrap.appendChild(el);
-}
-}
-
-function save(show=true){
-try{
-localStorage.setItem('maFermeIdleSave',JSON.stringify(game));
-if(show)say('Partie sauvegardée ! 💾');
-}catch(e){
-if(show)say('Sauvegarde indisponible dans ce navigateur.');
-}
-}
-
-$('buyPlot').onclick=()=>{
-let c=costs().plot;
-if(game.money>=c){
-game.money-=c;
-game.plots++;
-say('Une nouvelle parcelle est prête !');
-render();
-save(false);
-}
+let camera={
+  x:0,
+  y:0
 };
 
-$('buyWorker').onclick=()=>{
-let c=costs().worker;
-if(game.money>=c){
-game.money-=c;
-game.workers++;
-say('Un ouvrier rejoint la ferme !');
-render();
-save(false);
-}
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let running=false;
+
+let upgradeOpen=false;
+
+let score=0;
+
+let kills=0;
+
+let wave=1;
+
+let coins=0;
+
+let spawnTimer=0;
+
+let shootTimer=0;
+
+let lastTime=0;
+
+let enemies=[];
+
+let bullets=[];
+
+let particles=[];
+
+let keys={};
+
+let joystickX=0;
+
+let joystickY=0;
+
+let player;
+
+
+/* =====================================================
+   AMÉLIORATIONS
+===================================================== */
+
+let upgrades={
+  health:0,
+  fire:0,
+  damage:0,
+  speed:0
 };
 
-$('buySeeds').onclick=()=>{
-let c=costs().seeds;
-if(game.money>=c){
-game.money-=c;
-game.seeds++;
-say('Tes récoltes valent maintenant plus cher !');
-render();
-save(false);
-}
-};
 
-$('buySpeed').onclick=()=>{
-let c=costs().speed;
-if(game.money>=c){
-game.money-=c;
-game.speed++;
-say('Les cultures poussent plus vite !');
-render();
-save(false);
-}
-};
+function loadUpgrades(){
 
-$('saveBtn').onclick=()=>save(true);
+  try{
 
-$('resetBtn').onclick=()=>{
-if(confirm('Recommencer la ferme depuis le début ?')){
-game=initial();
-save(false);
-say('Nouvelle ferme créée !');
-render();
-}
-};
+    const saved=
+    localStorage.getItem(
+      "monsterSurvivalUpgrades"
+    );
 
-// Les ouvriers récoltent les cultures mûres et replantent.
-setInterval(()=>{
-let changed=false;
+    if(saved){
 
-for(let i=0;i<game.plots;i++){
-let c=game.crops[i];
+      upgrades=
+      JSON.parse(saved);
 
-if(c&&Date.now()-c.planted>=growMs()&&game.workers>0){
-game.money+=cropValue();
-game.harvests++;
-delete game.crops[i];
-changed=true;
-}
+    }
+
+  }catch(e){
+
+    upgrades={
+      health:0,
+      fire:0,
+      damage:0,
+      speed:0
+    };
+
+  }
+
 }
 
-if(game.workers>0){
-for(let i=0;i<game.plots&&i<game.workers;i++){
-if(!game.crops[i]){
-game.crops[i]={planted:Date.now()};
-changed=true;
-}
-}
-}
-
-if(changed){
-render();
-save(false);
-}else{
-render();
-}
-},1000);
-
-render();
-})();
-</script>
-</body>
-</html>
+function save
